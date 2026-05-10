@@ -96,7 +96,20 @@
 
             margin-top: 80px;    /* Adjust this number to move it down more or less */
             margin-bottom: 0;
+
+            max-width: 1000px;      /* Increase this so the text has room to breathe */
+            width: 95%;             /* Ensures it stays responsive on smaller screens */
+            white-space: nowrap;    /* Prevents wrapping entirely for short quotes */
 }
+
+/* Add this to allow wrapping ONLY on small phones so it doesn't break the screen */
+@media (max-width: 600px) {
+    .quote {
+        white-space: normal;
+        font-size: 28px;    /* Shrink the text a bit on mobile to keep it on fewer lines */
+    }
+}
+
 
         .footer {
             font-size:12px;
