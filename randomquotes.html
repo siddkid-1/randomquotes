@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Archive</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        
+        body {
+            height:100vh;
+            overflow:hidden;
+            display:flex;
+            justify-content:center;
+            font-family:Georgia, serif;
+            color:white;
+            /* REPLACE background.jpg WITH YOUR IMAGE */
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url("background.jpg");
+            background-size:cover;
+            background-position:center;
+            background-repeat:no-repeat;
+
+            /* This pushes the whole group down from the top */
+            padding-top: 25vh; 
+        }
+
+        body::before {
+            content:"";
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.15);
+            pointer-events:none;
+        }
+
+        .container {
+            width:90%;
+            max-width:1000px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            text-align:center;
+            z-index: 1;
+
+            /* This is the master control for the 'perfect even spacing' */
+            gap: 60px; 
+        }
+
+        .title {
+            font-family: inherit;
+            font-weight: bold;
+            text-transform: lowercase;
+            letter-spacing: 2px;
+            font-size: 32px; 
+            opacity: 0.9;
+            margin: 0; /* Ensures the gap remains perfectly even */
+        }
+
+        .generate-btn {
+            background:transparent;
+            color:white;
+            border:1px solid rgba(255,255,255,0.5);
+            padding:14px 28px;
+            font-size:16px;
+            letter-spacing:3px;
+            cursor:pointer;
+            transition:0.25s ease;
+            font-weight: bold;
+            margin: 0;
+            transform: translateY(20px); 
+        }
+
+        .generate-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: white;
+            transform: translateY(20px) scale(1.03); 
+}
+
+        .quote {
+            font-size:clamp(28px, 4vw, 52px);
+            line-height:1.4;
+            max-width:900px;
+            margin: 0;
+            min-height: 150px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity:1;
+            transition:opacity 0.25s ease;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.3);
+            white-space: pre-line;
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+
+        .footer {
+            font-size:12px;
+            opacity:0.45;
+            letter-spacing:2px;
+            text-transform:lowercase;
+            margin-top: 20px; 
+        }
+
+        @media(max-width:700px){
+            body { padding-top: 15vh; }
+            .container { gap: 40px; }
+            .title { font-size: 24px; }
+            .quote { font-size:30px; min-height: 120px; }
+            .generate-btn { width:100%; max-width:300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="title">random quote generator</div>
+        
+        <button class="generate-btn" onclick="generateQuote()">GENERATE</button>
+
+        <div class="quote" id="quote">"there are no more chicken nuggets."</div>
+
+        <div class="footer">— archived by sid</div>
+    </div>
+
+<script>
+/* 1. This is where you type your quotes */
+const rawQuotes = `
+        I ate the dog again.;
+        jimmy's drowning!;
+        stand up for: chickens!;
+        AHHHHHHHHH!;
+        separate me please...;
+        there are no more chicken nuggets.;
+        good morning Phineas.;
+        hello again, DORK!;
+        sucks for you.;
+        you are... my fire...;
+        bwfghjklqgtdkdfj;
+        under the jurisdiction of my lawyers...
+        I oppose --- a negotiation.;
+        the pumpkin man is watching you.;
+        good luck my friend! don't die!;
+        can we please report to station 6 now?;
+        have you ever eaten a chicken sandwich?;
+        noooo Patrickkkk don't eat meeeee;
+        it's over. we're done.;
+        BOOK IT!;
+        the population of Kansas is at an 
+        estimated 2.98 million.;
+        WE KNOW OUR RIGHTS!;
+        everyone can fly. to some extents.;
+        which plane are you jumping off?;
+        you ever think about paperclips? 
+        I did.;
+        the nokias won't find us here.;
+        at the end of the history of the earth,
+        mr. Obama has some words to say.;
+        I find that eating people is disgusting.;
+        loOk aT tHosE sTaRS!;
+        we may be loud. wear some headphones.;
+        we interrupt your broadcast for
+        some interesting news...;
+        not every person gets to touch
+        the inside of a peanut.;
+        stupid board game.;
+        stop eating my pillow case!;
+        what were you expecting? 
+        something cool? you're not getting it.;
+        hey Joe! you still haven't paid your rent.;
+        no way. NO WAY. A PEACOCK!!;
+        shout out to Perry. he's a platypus.;
+        I actually have better things to do.
+        the beginning of the pickle invasion.;
+        nah bro they be on the kids nowadays.;
+        this whole thing was made by a 
+        pretty cool guy.;
+        is it really worth it to wear
+        the same socks you wear?;
+        mom can I get a phone now?;
+        there is no escape from Bob.;
+        while we can't legally bake
+        your hair, Mrs. Smith, we do
+        have the authority to pan sear it.;
+        step right on up!;
+        do you support the lollipop community?;
+        dude, it's 4AM. let me sleep.;
+        and then a child came up to me.;
+        obama fried chicken.;
+        I cannot pronounce the word 
+        "worcestershire".;
+        hey Maddie! how's the fam?;
+        asian people are mildly racist.;
+        good people come to me.; 
+        https://www.youtube.com/watch?v=dQw4w9WgXcQ;
+        trust me bro, I didn't steal your
+        racing car. that piece of junk?;
+        AHHH NOO THERE'S AN OSTRICH CHASING ME!;
+        the lawnmower is for eating the grass,;
+        YAAAAAAAAAAAAAHHH!;
+        calm down class! it's only a FROG!;
+        oh gosh there's a GIANT PEANUT!!;
+        when most people open a fridge, they
+        don't expect a 34-year old male inside.
+        Carl, get out of my fridge.;
+        nonono I forgot to take out the cactus...;
+        when we stand as a country, we try to
+        avoid sitting down.;
+        THE ELEVATOR KNOWS MY NAME!;
+        please remain calm during the lobster incident.;
+        we lost another intern to the yogurt machine.;
+        someone unplugged grandma.;
+        why is the dog shaped like a rectangle?;
+        THE CUCUMBERS HAVE CROSSED THE BORDER!;
+        but the juice empire demands another sacrifice.;
+        alright. WHO ATE THE COOKIE?;
+        we interrupt your broadcast to report
+        unusual activity near the pickle border.;
+        the Department of Toast confirms the 
+        return of the butter riots.;
+        due to budget cuts, the magic wizard 
+        will no longer appear on weekdays.;
+        good evening. today marks 37 years since
+        the great toaster incident.;
+        llama people exist. STOP FILMING ME!;
+        hey look over there, we can drink cauliflower now!;
+        CARL GIVE ME BACK MY FRIDGE!;
+        quiet. they're counting.;
+        DO NOT TRUST THE PANCAKES!;
+        we can still save the waffles.;
+        some guy just apparated.;
+        there is a chair in the parking lot behaving normally.;
+`;
+
+const quotes = rawQuotes.split(";").map(q => q.trim()).filter(q => q);
+const quoteElement = document.getElementById("quote");
+let deck = []; 
+
+function generateQuote(isFirstLoad = false) {
+    // If deck is empty, refill and shuffle
+    if (deck.length === 0) {
+        deck = [...quotes];
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+    }
+
+    const nextQuote = deck.pop();
+
+    if (isFirstLoad) {
+        quoteElement.textContent = `"${nextQuote}"`;
+        quoteElement.style.opacity = 1;
+    } else {
+        quoteElement.style.opacity = 0;
+        setTimeout(() => {
+            quoteElement.textContent = `"${nextQuote}"`;
+            quoteElement.style.opacity = 1;
+        }, 250);
+    }
+}
+
+// Starts the first quote immediately
+generateQuote(true);
+
+</script>
+
+
+</body>
+</html>
