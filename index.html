@@ -67,7 +67,14 @@
             font-weight: bold;
             margin: 0;
             transform: translateY(20px); 
+        
         }
+        
+        <form id="chaosForm" class="submit-form">
+        <input type="text" name="quote" id="chaosInput" class="input-field" placeholder="submit a new crisis..." required>
+        <button type="submit" id="submitBtn" class="submit-btn">SUBMIT</button>
+        </form>
+
 
         .generate-btn:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -75,22 +82,57 @@
             transform: translateY(20px) scale(1.03); 
 }
 
-        .quote {
-    font-size: clamp(24px, 4.5vw, 48px);
-    line-height: 1.4;
-    margin: 80px auto 0 auto; /* Sets top margin to 80px and centers horizontally */
-    min-height: 180px;
-    display: block; 
-    text-align: center;
-    opacity: 1;
-    transition: opacity 0.25s ease;
-    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+.submit-form {
+  margin-top: 40px;
+  z-index: 2;
+}
 
-    /* The Fix for "Rent" */
-    width: 100%;             /* Let it use all available space */
-    max-width: 1200px;       /* High limit so it doesn't wrap early */
-    white-space: normal;     /* Allows wrapping only when NECESSARY */
-    text-wrap: pretty;       /* Prevents single words on a new line in modern browsers */
+.input-field {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-family: inherit;
+  font-size: 18px;
+  padding: 10px;
+  width: 250px;
+  text-align: center;
+  outline: none;
+}
+
+.submit-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-left: 10px;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  opacity: 1;
+}
+
+
+        .quote {
+            font-size: clamp(24px, 4.5vw, 48px);
+            line-height: 1.4;
+            margin: 80px auto 0 auto; /* Sets top margin to 80px and centers horizontally */
+            min-height: 180px;
+            display: block; 
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.25s ease;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+
+                /* The Fix for "Rent" */
+            width: 100%;             /* Let it use all available space */
+            max-width: 1200px;       /* High limit so it doesn't wrap early */
+            white-space: normal;     /* Allows wrapping only when NECESSARY */
+            text-wrap: pretty;       /* Prevents single words on a new line in modern browsers */
 }
 
         .footer {
@@ -123,8 +165,8 @@
     </div>
 
 <script>
-/* 1. This is where you type your quotes */
-const rawQuotes = `
+
+    const rawQuotes = `
         I ate the dog again.;
         jimmy's drowning!;
         stand up for: chickens!;
@@ -181,7 +223,6 @@ const rawQuotes = `
         while we can't legally bake
         your hair, Mrs. Smith, we do
         have the authority to pan sear it.;
-        step right on up!;
         do you support the lollipop community?;
         dude, it's 4AM. let me sleep.;
         and then a child came up to me.;
@@ -241,6 +282,12 @@ const rawQuotes = `
         we'd like to stop you for a moment,
         as the jury has a few words to say.;
         ding dong! your horse has arrived!;
+        THEY TURNED THE STAIRS OFF.;
+        I know what you did with that stapler, Kevin.;
+        by reading this you have accidentally
+        joined a competitive kazoo league.;
+        we found the 10th dentist. he was
+        caught in the bathroom licking cabbages.;
         
 `;
 
@@ -275,8 +322,41 @@ function generateQuote(isFirstLoad = false) {
 // Starts the first quote immediately
 generateQuote(true);
 
-</script>
+const chaosForm = document.getElementById('chaosForm');
+const submitBtn = document.getElementById('submitBtn');
+const chaosInput = document.getElementById('chaosInput');
 
+chaosForm.addEventListener('submit', function(e) {
+  e.preventDefault(); // Prevents the page from reloading
+  
+  const val = chaosInput.value;
+  submitBtn.textContent = "SENDING...";
+
+  fetch("https://formsubmit.co", {
+    method: "POST",
+    headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+        new_quote: val,
+        _subject: "New Chaos Quote Submission!"
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    submitBtn.textContent = "THANKS!";
+    chaosInput.value = ""; // Clears the box
+    setTimeout(() => { submitBtn.textContent = "SUBMIT"; }, 3000); // Resets button after 3 seconds
+  })
+  .catch(error => {
+    submitBtn.textContent = "ERROR";
+    console.log(error);
+  });
+});
+
+
+</script>
 
 </body>
 </html>
